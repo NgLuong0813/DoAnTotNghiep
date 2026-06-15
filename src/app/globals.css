@@ -1,0 +1,79 @@
+@import url('https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@300;400;500;600;700&family=Playfair+Display:wght@600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --mau-chinh:  #0066CC;   /* Xanh dương UTT */
+  --mau-phu:    #F47920;   /* Cam UTT */
+  --mau-dam:    #004d99;   /* Xanh đậm */
+  --mau-nen:    #f0f6ff;   /* Nền xanh nhạt */
+}
+
+body {
+  font-family: 'Be Vietnam Pro', sans-serif;
+  background-color: var(--mau-nen);
+}
+
+h1, h2, h3, .tieu-de-thu-vien {
+  font-family: 'Playfair Display', serif;
+}
+
+/* Đường gạch cam trang trí */
+.duong-trang-tri::after {
+  content: '';
+  display: block;
+  width: 48px;
+  height: 3px;
+  background: var(--mau-phu);
+  margin-top: 8px;
+}
+
+/* Nội dung Word parse ra */
+/* Nội dung Word parse ra */
+.noi-dung-bai-viet {
+  font-family: 'Times New Roman', Times, serif;
+  font-size: 14pt;
+  line-height: 1.8;
+  color: #000;
+}
+.noi-dung-bai-viet p  {
+  margin-bottom: 6px;
+  /* KHÔNG đặt text-align mặc định để Word style được ưu tiên */
+}
+.noi-dung-bai-viet p:empty { margin: 0; height: 0.5em; }
+.noi-dung-bai-viet h1 { font-size: 16pt; font-weight: 700; margin: 12px 0 6px; }
+.noi-dung-bai-viet h2 { font-size: 14pt; font-weight: 700; margin: 10px 0 5px; }
+.noi-dung-bai-viet h3 { font-size: 13pt; font-weight: 700; margin: 8px 0 4px; }
+.noi-dung-bai-viet strong, .noi-dung-bai-viet b { font-weight: 700; }
+.noi-dung-bai-viet em, .noi-dung-bai-viet i     { font-style: italic; }
+.noi-dung-bai-viet u  { text-decoration: underline; }
+.noi-dung-bai-viet s  { text-decoration: line-through; }
+.noi-dung-bai-viet ul { list-style-type: disc;    margin: 6px 0 6px 2em; }
+.noi-dung-bai-viet ol { list-style-type: decimal; margin: 6px 0 6px 2em; }
+.noi-dung-bai-viet li { margin-bottom: 3px; line-height: 1.7; }
+.noi-dung-bai-viet table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+.noi-dung-bai-viet td, .noi-dung-bai-viet th { border: 1px solid #000; padding: 5px 8px; vertical-align: top; }
+.noi-dung-bai-viet th { background: #f0f0f0; font-weight: 700; }
+.noi-dung-bai-viet img { max-width: 100%; height: auto; display: block; margin: 8px auto; }
+.noi-dung-bai-viet a  { color: #0066CC; text-decoration: underline; }
+
+/* ✅ Giữ nguyên căn chỉnh từ Word style inline */
+.noi-dung-bai-viet [style*="text-align: center"] { text-align: center !important; }
+.noi-dung-bai-viet [style*="text-align:center"]  { text-align: center !important; }
+.noi-dung-bai-viet [style*="text-align: right"]  { text-align: right !important; }
+.noi-dung-bai-viet [style*="text-align:right"]   { text-align: right !important; }
+.noi-dung-bai-viet [style*="text-align: left"]   { text-align: left !important; }
+.noi-dung-bai-viet [style*="text-align:left"]    { text-align: left !important; }
+.noi-dung-bai-viet [style*="text-align: justify"]  { text-align: justify !important; }
+.noi-dung-bai-viet [style*="text-align:justify"]   { text-align: justify !important; }
+.noi-dung-bai-viet p.center  { text-align: center !important; }
+.noi-dung-bai-viet p.right   { text-align: right !important; }
+.noi-dung-bai-viet p.justify { text-align: justify !important; }
+.noi-dung-bai-viet [style*="margin-left"]  { /* giữ indent */ }
+
+html { scroll-behavior: smooth; }
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: #f1f1f1; }
+::-webkit-scrollbar-thumb { background: #0066CC66; border-radius: 3px; }
