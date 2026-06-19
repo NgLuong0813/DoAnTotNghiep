@@ -1,8 +1,7 @@
-﻿/**
- * API â€” Phiáº¿u MÆ°á»£n Tráº£
- * GET  /api/muontra  â†’ Danh sÃ¡ch vá»›i filter Ä‘áº§y Ä‘á»§
- * POST /api/muontra  â†’ Sinh viÃªn gá»­i yÃªu cáº§u mÆ°á»£n sÃ¡ch
- * ÄÆ°á»ng dáº«n: src/app/api/muontra/route.ts
+/**
+ * API - Phieu Muon Tra
+ * GET  /api/muontra  -> Danh sach voi filter day du
+ * POST /api/muontra  -> Sinh vien gui yeu cau muon sach
  */
 
 import { NextRequest, NextResponse } from 'next/server'
@@ -13,10 +12,11 @@ import PhieuMuon from '@/models/PhieuMuon'
 import Sach from '@/models/Sach'
 import NguoiDung from '@/models/NguoiDung'
 import { addDays } from 'date-fns'
+import mongoose from 'mongoose'
 
 export async function GET(req: NextRequest) {
   const phien = await getServerSession(cauHinhXacThuc)
-  if (!phien) return NextResponse.json({ thanhCong: false, thongBao: 'ChÆ°a Ä‘Äƒng nháº­p' }, { status: 401 })
+  if (!phien) return NextResponse.json({ thanhCong: false, thongBao: 'Chua dang nhap' }, { status: 401 })
 
   await ketNoiMongoDB()
   const { searchParams } = new URL(req.url)
@@ -35,7 +35,12 @@ export async function GET(req: NextRequest) {
   const gioiHan     = parseInt(searchParams.get('gioiHan') || '10')
 
   const dieuKien: any = {}
-  if (nguoiDung.vaiTro === 'sinhVien') dieuKien.nguoiMuon = nguoiDung.id
+
+  // FIX QUAN TRONG: phai convert string id sang ObjectId de $match trong aggregate hoat dong dung
+  if (nguoiDung.vaiTro === 'sinhVien') {
+    dieuKien.nguoiMuon = new mongoose.Types.ObjectId(nguoiDung.id)
+  }
+
   if (trangThai) dieuKien.trangThai = trangThai
 
   if (tuNgayMuon || denNgayMuon) {
@@ -54,13 +59,11 @@ export async function GET(req: NextRequest) {
     if (denHanTra) dieuKien.ngayHanTra.$lte = new Date(denHanTra + 'T23:59:59')
   }
 
-  // âœ… LuÃ´n dÃ¹ng aggregate Ä‘á»ƒ Ä‘áº£m báº£o filter text hoáº¡t Ä‘á»™ng
-  // DÃ¹ng Ä‘Ãºng tÃªn collection: 'nguoiDung' vÃ  'sach' (khÃ´ng pháº£i 'nguoiDungs', 'sachs')
   const pipeline: any[] = [
     { $match: dieuKien },
     {
       $lookup: {
-        from: 'nguoiDung',  // âœ… ÄÃºng tÃªn collection
+        from: 'nguoiDung',
         localField: 'nguoiMuon',
         foreignField: '_id',
         as: 'nguoiMuon',
@@ -69,7 +72,7 @@ export async function GET(req: NextRequest) {
     { $unwind: { path: '$nguoiMuon', preserveNullAndEmptyArrays: true } },
     {
       $lookup: {
-        from: 'sach',  // âœ… ÄÃºng tÃªn collection
+        from: 'sach',
         localField: 'sach',
         foreignField: '_id',
         as: 'sach',
@@ -87,7 +90,6 @@ export async function GET(req: NextRequest) {
     { $unwind: { path: '$thuThuXuLy', preserveNullAndEmptyArrays: true } },
   ]
 
-  // âœ… Filter theo tÃªn ngÆ°á»i mÆ°á»£n / sá»‘ tháº» / mÃ£ SV
   if (tuKhoa) {
     pipeline.push({
       $match: {
@@ -100,7 +102,6 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  // âœ… Filter theo tÃªn sÃ¡ch
   if (tenSach) {
     pipeline.push({
       $match: {
@@ -109,16 +110,13 @@ export async function GET(req: NextRequest) {
     })
   }
 
-  // Äáº¿m tá»•ng
   const tongSoResult = await PhieuMuon.aggregate([...pipeline, { $count: 'tongSo' }])
   const tongSo = tongSoResult[0]?.tongSo || 0
 
-  // PhÃ¢n trang
   pipeline.push(
     { $sort: { ngayTao: -1 } },
     { $skip: (trang - 1) * gioiHan },
     { $limit: gioiHan },
-    // Chá»‰ giá»¯ cÃ¡c field cáº§n thiáº¿t
     {
       $project: {
         trangThai: 1, ngayTao: 1, ngayMuon: 1, ngayHanTra: 1,
@@ -142,11 +140,11 @@ export async function GET(req: NextRequest) {
 
 export async function POST(req: NextRequest) {
   const phien = await getServerSession(cauHinhXacThuc)
-  if (!phien) return NextResponse.json({ thanhCong: false, thongBao: 'ChÆ°a Ä‘Äƒng nháº­p' }, { status: 401 })
+  if (!phien) return NextResponse.json({ thanhCong: false, thongBao: 'Chua dang nhap' }, { status: 401 })
 
   const nguoiDung = phien.user as any
   if (nguoiDung.trangThaiThe !== 'hoatDong') {
-    return NextResponse.json({ thanhCong: false, thongBao: 'Tháº» thÆ° viá»‡n chÆ°a Ä‘Æ°á»£c kÃ­ch hoáº¡t' }, { status: 403 })
+    return NextResponse.json({ thanhCong: false, thongBao: 'The thu vien chua duoc kich hoat' }, { status: 403 })
   }
 
   await ketNoiMongoDB()
@@ -154,7 +152,7 @@ export async function POST(req: NextRequest) {
 
   const sach = await Sach.findById(sachId)
   if (!sach || sach.soBanConLai < 1) {
-    return NextResponse.json({ thanhCong: false, thongBao: 'SÃ¡ch hiá»‡n khÃ´ng cÃ²n báº£n nÃ o Ä‘á»ƒ mÆ°á»£n' }, { status: 400 })
+    return NextResponse.json({ thanhCong: false, thongBao: 'Sach hien khong con ban nao de muon' }, { status: 400 })
   }
 
   const daMuon = await PhieuMuon.findOne({
@@ -163,12 +161,12 @@ export async function POST(req: NextRequest) {
     trangThai: { $in: ['choDuyet', 'dangMuon'] },
   })
   if (daMuon) {
-    return NextResponse.json({ thanhCong: false, thongBao: 'Báº¡n Ä‘Ã£ mÆ°á»£n hoáº·c Ä‘ang chá» duyá»‡t cuá»‘n sÃ¡ch nÃ y' }, { status: 400 })
+    return NextResponse.json({ thanhCong: false, thongBao: 'Ban da muon hoac dang cho duyet cuon sach nay' }, { status: 400 })
   }
 
   const ndInfo = await NguoiDung.findById(nguoiDung.id)
   if (ndInfo && ndInfo.dangMuon >= 5) {
-    return NextResponse.json({ thanhCong: false, thongBao: 'Báº¡n Ä‘ang mÆ°á»£n tá»‘i Ä‘a 5 cuá»‘n sÃ¡ch' }, { status: 400 })
+    return NextResponse.json({ thanhCong: false, thongBao: 'Ban dang muon toi da 5 cuon sach' }, { status: 400 })
   }
 
   const phieuMoi = await PhieuMuon.create({
@@ -180,4 +178,3 @@ export async function POST(req: NextRequest) {
 
   return NextResponse.json({ thanhCong: true, duLieu: phieuMoi }, { status: 201 })
 }
-

@@ -223,7 +223,7 @@ export default function TrangDangNhap() {
           {[
             { icon: '👑', nhan: 'Admin', em: 'admin@utt.edu.vn', mk: 'admin123' },
             { icon: '📋', nhan: 'Thủ thư', em: 'thuthu@utt.edu.vn', mk: 'admin123' },
-            { icon: '🎓', nhan: 'Sinh viên', em: 'sv001@sv.utt.edu.vn', mk: 'sinhvien123' },
+            { icon: '🎓', nhan: 'Sinh viên', em: 'sv1001@sv.utt.edu.vn', mk: 'sinhvien123' },
           ].map(tk => (
             <button key={tk.em} onClick={() => dienNhanh(tk.em, tk.mk)}
               className="w-full text-left text-xs py-1 hover:opacity-70 transition-opacity"
